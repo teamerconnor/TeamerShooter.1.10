@@ -8,12 +8,12 @@ const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// Lights
+
 const light = new THREE.PointLight(0x00ff00, 1, 100);
 light.position.set(0, 10, 0);
 scene.add(light, new THREE.AmbientLight(0x404040));
 
-// Arena
+
 const floor = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshStandardMaterial({ color: 0x050505 }));
 floor.rotation.x = -Math.PI / 2;
 scene.add(floor);
@@ -24,7 +24,7 @@ const w1 = new THREE.Mesh(wallG, wallMat); w1.position.set(0, 5, -50);
 const w2 = new THREE.Mesh(wallG, wallMat); w2.position.set(0, 5, 50);
 scene.add(w1, w2);
 
-// GREEN CLAW SKY
+
 for(let i = 0; i < 4; i++) {
     const claw = new THREE.Mesh(
         new THREE.CapsuleGeometry(0.5, 20, 4, 8),
@@ -35,7 +35,7 @@ for(let i = 0; i < 4; i++) {
     scene.add(claw);
 }
 
-// Player & Weapon Group
+
 const player = new THREE.Group();
 const body = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({ color: 0x00ff00 }));
 player.add(body);
@@ -50,7 +50,7 @@ player.add(pistol);
 let currentWeapon = 'pistol';
 let grenades = 3;
 
-// Input & Weapon Switching
+
 const keys = {};
 window.addEventListener('keydown', (e) => {
     keys[e.code] = true;
@@ -61,7 +61,7 @@ window.addEventListener('keydown', (e) => {
 });
 window.addEventListener('keyup', (e) => keys[e.code] = false);
 
-// Shooting Logic
+
 const bullets = [];
 window.addEventListener('mousedown', () => {
     if(currentWeapon === 'knife') return;
@@ -74,7 +74,7 @@ window.addEventListener('mousedown', () => {
 
 function throwGrenade() { if(grenades > 0) { console.log("Grenade!"); grenades--; } }
 
-// NPCs
+
 const enemies = [];
 function spawnEnemy() {
     const e = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({color: 0xff0000}));
