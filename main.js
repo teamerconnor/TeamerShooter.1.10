@@ -1,23 +1,21 @@
-import * as THREE from 'https://unpkg.com/three@0.132.2/build/three.module.js';
-
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x000500);
+scene.background = new THREE.Color(0x000500); 
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-const light = new THREE.AmbientLight(0x404040); 
-scene.add(light);
-const dLight = new THREE.DirectionalLight(0x00ff00, 1);
-dLight.position.set(5, 10, 7);
-scene.add(dLight);
+const light = new THREE.PointLight(0x00ff00, 1, 100);
+light.position.set(0, 10, 0);
+scene.add(light, new THREE.AmbientLight(0x404040));
 
-const floor = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshStandardMaterial({ color: 0x111111 }));
+// Arena Floor
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshStandardMaterial({ color: 0x050505 }));
 floor.rotation.x = -Math.PI / 2;
 scene.add(floor);
 
+// GREEN CLAW SKY
 for(let i = 0; i < 4; i++) {
     const claw = new THREE.Mesh(
         new THREE.CapsuleGeometry(0.5, 20, 4, 8),
@@ -28,14 +26,56 @@ for(let i = 0; i < 4; i++) {
     scene.add(claw);
 }
 
-const player = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({ color: 0x00ff00 }));
+const player = new THREE.Group();
+const body = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({ color: 0x00ff00 }));
+player.add(body);
 scene.add(player);
 
-camera.position.set(0, 10, 20);
-camera.lookAt(player.position);
+// Weapon Models
+const pistol = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.6), new THREE.MeshStandardMaterial({color: 0x333333}));
+const rifle = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.3, 1.2), new THREE.MeshStandardMaterial({color: 0x222222}));
+const knife = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.05, 0.5), new THREE.MeshStandardMaterial({color: 0xaaaaaa}));
+pistol.position.set(0.6, 0, -0.5);
+player.add(pistol);
+
+let currentWeapon = 'pistol';
+
+
+const keys = {};
+window.addEventListener('keydown', (e) => {
+    keys[e.code] = true;
+    if(e.key === '1') { player.remove(rifle, knife); player.add(pistol); currentWeapon = 'pistol'; }
+    if(e.key === '2') { player.remove(pistol, knife); player.add(rifle); currentWeapon = 'rifle'; }
+    if(e.key === '3') { player.remove(pistol, rifle); player.add(knife); currentWeapon = 'knife'; }
+});
+window.addEventListener('keyup', (e) => keys[e.code] = false);
+
+
+const enemies = [];
+function spawnEnemy() {
+    const e = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({color: 0xff0000}));
+    e.position.set((Math.random()-0.5)*80, 0.5, -40);
+    scene.add(e);
+    enemies.push(e);
+}
+setInterval(spawnEnemy, 2000);
 
 function animate() {
     requestAnimationFrame(animate);
+    
+    if(keys['KeyW']) player.position.z -= 0.15;
+    if(keys['KeyS']) player.position.z += 0.15;
+    if(keys['KeyA']) player.position.x -= 0.15;
+    if(keys['KeyD']) player.position.x += 0.15;
+
+    enemies.forEach(e => {
+        const dir = new THREE.Vector3().subVectors(player.position, e.position).normalize();
+        e.position.addScaledVector(dir, 0.05);
+        e.lookAt(player.position);
+    });
+
+    camera.position.set(player.position.x, player.position.y + 10, player.position.z + 15);
+    camera.lookAt(player.position);
     renderer.render(scene, camera);
 }
 animate();
