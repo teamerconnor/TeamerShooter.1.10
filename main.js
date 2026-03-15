@@ -26,56 +26,30 @@ for(let i = 0; i < 4; i++) {
     scene.add(claw);
 }
 
+
 const player = new THREE.Group();
 const body = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({ color: 0x00ff00 }));
 player.add(body);
 scene.add(player);
 
-// Weapon Models
+// Weapons
 const pistol = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.6), new THREE.MeshStandardMaterial({color: 0x333333}));
-const rifle = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.3, 1.2), new THREE.MeshStandardMaterial({color: 0x222222}));
-const knife = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.05, 0.5), new THREE.MeshStandardMaterial({color: 0xaaaaaa}));
 pistol.position.set(0.6, 0, -0.5);
-player.add(pistol);
-
-let currentWeapon = 'pistol';
-
+player.add(pistol)
+let cameraMode = 2; 
 
 const keys = {};
 window.addEventListener('keydown', (e) => {
     keys[e.code] = true;
-    if(e.key === '1') { player.remove(rifle, knife); player.add(pistol); currentWeapon = 'pistol'; }
-    if(e.key === '2') { player.remove(pistol, knife); player.add(rifle); currentWeapon = 'rifle'; }
-    if(e.key === '3') { player.remove(pistol, rifle); player.add(knife); currentWeapon = 'knife'; }
+    // Switch Camera with V
+    if(e.code === 'KeyV') {
+        cameraMode = (cameraMode + 1) % 3;
+    }
 });
 window.addEventListener('keyup', (e) => keys[e.code] = false);
 
-
+// NPCs
 const enemies = [];
 function spawnEnemy() {
     const e = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({color: 0xff0000}));
-    e.position.set((Math.random()-0.5)*80, 0.5, -40);
-    scene.add(e);
-    enemies.push(e);
-}
-setInterval(spawnEnemy, 2000);
-
-function animate() {
-    requestAnimationFrame(animate);
-    
-    if(keys['KeyW']) player.position.z -= 0.15;
-    if(keys['KeyS']) player.position.z += 0.15;
-    if(keys['KeyA']) player.position.x -= 0.15;
-    if(keys['KeyD']) player.position.x += 0.15;
-
-    enemies.forEach(e => {
-        const dir = new THREE.Vector3().subVectors(player.position, e.position).normalize();
-        e.position.addScaledVector(dir, 0.05);
-        e.lookAt(player.position);
-    });
-
-    camera.position.set(player.position.x, player.position.y + 10, player.position.z + 15);
-    camera.lookAt(player.position);
-    renderer.render(scene, camera);
-}
-animate();
+    e.position.set((Math.random()-0.5)*80, 0.
